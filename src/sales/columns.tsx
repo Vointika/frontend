@@ -12,6 +12,8 @@ import { getLocale } from "#/paraglide/runtime";
 import { AppResourceLink } from "#/shared/links";
 import { formatSlotDateTime } from "#/slots";
 import { AppBookingStatusBadge } from "./components/AppBookingStatusBadge";
+import { AppOrderStatusBadge } from "./components/AppOrderStatusBadge";
+import { AppPaymentStateBadge } from "./components/AppPaymentStateBadge";
 import { BOOKING_STATUS_OPTIONS } from "./format";
 import type { BookingLine, BookingManifestItem, OrderListItem } from "./types";
 
@@ -71,6 +73,18 @@ export const orderColumns = (
 		accessorKey: "totalPrice",
 		header: () => <span className="block text-right">{m.total()}</span>,
 		cell: ({ row }) => money(row.original.totalPrice, row.original.currency),
+	},
+	{
+		id: "status",
+		header: () => <span>{m.status()}</span>,
+		cell: ({ row }) => <AppOrderStatusBadge status={row.original.status} />,
+	},
+	{
+		id: "paymentState",
+		header: () => <span>{m.payment()}</span>,
+		cell: ({ row }) => (
+			<AppPaymentStateBadge state={row.original.paymentState} />
+		),
 	},
 	timestampColumn<OrderListItem>("placedAt", m.placed(), formatDateTime),
 ];

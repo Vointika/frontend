@@ -8,11 +8,29 @@ interface OrderFees {
 	operatorAmount: number;
 }
 
+export type OrderStatus = "CONFIRMED" | "PARTIALLY_CANCELLED" | "CANCELLED";
+export type PaymentState = "PAID" | "PARTIALLY_REFUNDED" | "REFUNDED";
+export type RefundStatus = "PENDING" | "SUCCEEDED" | "FAILED";
+
+export interface Refund {
+	id: string;
+	bookingId: string;
+	amount: number;
+	currency: string;
+	status: RefundStatus;
+	reason: string | null;
+	requestedBy: string;
+	createdAt: string;
+}
+
 export interface OrderListItem {
 	id: string;
 	number: number;
 	reference: string;
 	context: "orders";
+	status: OrderStatus;
+	paymentState: PaymentState;
+	refundedTotal: number;
 	customerName: string;
 	customerEmail: string;
 	totalPrice: number;
@@ -73,6 +91,10 @@ export interface Order {
 	number: number;
 	reference: string;
 	context: "orders";
+	status: OrderStatus;
+	paymentState: PaymentState;
+	refundedTotal: number;
+	refunds: Refund[];
 	checkoutSessionId: string;
 	paymentId: string;
 	customer: OrderCustomer;
@@ -81,17 +103,6 @@ export interface Order {
 	currency: string;
 	placedAt: string;
 	bookings: Booking[];
-}
-
-export interface Refund {
-	id: string;
-	bookingId: string;
-	amount: number;
-	currency: string;
-	status: "PENDING" | "SUCCEEDED" | "FAILED";
-	reason: string | null;
-	requestedBy: string;
-	createdAt: string;
 }
 
 export interface BookingManifestItem extends Booking {

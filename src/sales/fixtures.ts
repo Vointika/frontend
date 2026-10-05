@@ -1,5 +1,5 @@
 import type { AuthUser } from "#/auth";
-import type { BookingManifestItem } from "./types";
+import type { BookingManifestItem, Order, OrderListItem } from "./types";
 
 export const bookingInUsd: BookingManifestItem = {
 	id: "bk-1",
@@ -53,4 +53,71 @@ export const operatorInEur: AuthUser = {
 			role: "OWNER",
 		},
 	],
+};
+
+export const orderInUsd: Order = {
+	id: "ord-1",
+	number: 1001,
+	reference: "#1001",
+	context: "orders",
+	status: "CONFIRMED",
+	paymentState: "PARTIALLY_REFUNDED",
+	refundedTotal: 40,
+	refunds: [
+		{
+			id: "rf-1",
+			bookingId: "bk-1",
+			amount: 40,
+			currency: "USD",
+			status: "SUCCEEDED",
+			reason: "Rained out",
+			requestedBy: "u-1",
+			createdAt: "2026-10-02T15:00:00Z",
+		},
+		{
+			id: "rf-2",
+			bookingId: "bk-1",
+			amount: 10,
+			currency: "USD",
+			status: "FAILED",
+			reason: null,
+			requestedBy: "u-1",
+			createdAt: "2026-10-03T09:30:00Z",
+		},
+	],
+	checkoutSessionId: "cs-1",
+	paymentId: "pi_123",
+	customer: {
+		name: "Ada",
+		email: "ada@example.com",
+		phone: null,
+		detail: null,
+	},
+	totalPrice: 338,
+	fees: {
+		linesTotal: 338,
+		bookingFee: 16.9,
+		bookingFeePercentage: 5,
+		bookingFeeBearer: "OPERATOR",
+		operatorAmount: 321.1,
+	},
+	currency: "USD",
+	placedAt: "2026-10-01T12:00:00Z",
+	bookings: [bookingInUsd],
+};
+
+export const orderRowInUsd: OrderListItem = {
+	id: orderInUsd.id,
+	number: orderInUsd.number,
+	reference: orderInUsd.reference,
+	context: "orders",
+	status: orderInUsd.status,
+	paymentState: orderInUsd.paymentState,
+	refundedTotal: orderInUsd.refundedTotal,
+	customerName: orderInUsd.customer.name,
+	customerEmail: orderInUsd.customer.email,
+	totalPrice: orderInUsd.totalPrice,
+	fees: orderInUsd.fees,
+	currency: orderInUsd.currency,
+	placedAt: orderInUsd.placedAt,
 };
