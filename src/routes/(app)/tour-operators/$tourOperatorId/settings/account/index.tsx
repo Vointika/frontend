@@ -3,6 +3,7 @@ import { AppPageHeader, AppPageShell } from "@vointika/ui";
 import { AppAccountSettings } from "#/auth";
 import * as m from "#/paraglide/messages";
 import { AppBreadcrumb } from "#/shared/links";
+import { AppMemberAlertsCard } from "#/team";
 
 export const Route = createFileRoute(
 	"/(app)/tour-operators/$tourOperatorId/settings/account/",
@@ -31,6 +32,7 @@ function AccountSettingsPage() {
 				}
 			/>
 			<AppAccountSettings />
+			<AppMemberAlertsCard tourOperatorId={tourOperatorId} />
 		</AppPageShell>
 	);
 }

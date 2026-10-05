@@ -28,3 +28,10 @@ export interface Invitation {
 		name: string;
 	};
 }
+
+export const ALERT_TYPES = ["NEW_BOOKING"] as const;
+export type AlertType = (typeof ALERT_TYPES)[number];
+
+export interface MemberAlerts {
+	alerts: { type: AlertType; subscribed: boolean }[];
+}

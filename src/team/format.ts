@@ -1,6 +1,11 @@
 import type { AppBadgeProps } from "@vointika/ui";
 import * as m from "#/paraglide/messages";
-import type { Invitation, InvitationStatus, MemberRole } from "./types";
+import type {
+	AlertType,
+	Invitation,
+	InvitationStatus,
+	MemberRole,
+} from "./types";
 
 export const roleLabel = (role: MemberRole): string =>
 	role === "OWNER"
@@ -34,3 +39,9 @@ export const statusBadgeVariant = (
 		: status === "ACCEPTED"
 			? "success"
 			: "outline";
+
+const ALERT_LABELS: Record<AlertType, () => string> = {
+	NEW_BOOKING: m.alert_new_booking,
+};
+
+export const alertTypeLabel = (type: AlertType): string => ALERT_LABELS[type]();

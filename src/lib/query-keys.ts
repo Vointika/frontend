@@ -17,6 +17,8 @@ export const queryKeys = {
 	members: (tourOperatorId: string) => ["members", tourOperatorId] as const,
 	member: (tourOperatorId: string, userId: string) =>
 		["members", tourOperatorId, userId] as const,
+	myAlerts: (tourOperatorId: string) =>
+		["members", tourOperatorId, "me", "alerts"] as const,
 	invitations: (tourOperatorId: string) =>
 		["invitations", tourOperatorId] as const,
 	invitation: (tourOperatorId: string, invitationId: string) =>
