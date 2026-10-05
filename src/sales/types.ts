@@ -83,6 +83,17 @@ export interface Order {
 	bookings: Booking[];
 }
 
+export interface Refund {
+	id: string;
+	bookingId: string;
+	amount: number;
+	currency: string;
+	status: "PENDING" | "SUCCEEDED" | "FAILED";
+	reason: string | null;
+	requestedBy: string;
+	createdAt: string;
+}
+
 export interface BookingManifestItem extends Booking {
 	context: "bookings";
 	orderId: string;

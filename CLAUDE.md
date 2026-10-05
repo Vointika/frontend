@@ -158,7 +158,14 @@ metafield-definition, metaobject, metaobject-definition and experience
 details have none for a different reason: the backend logs every one of
 their writes correctly, but showing that trail on these nine screens was a
 product decision, not a backend gap, so they carry no `AppActivityCard`
-either.
+either. The booking detail carries one under `BOOKING`: a booking is
+created by the storefront's checkout, which logs nothing, so its trail is
+the admin's own writes, cancel, move and refund, and nothing before them;
+the order detail has none because the admin never writes an order
+directly. The booking page is also where those three writes live, as
+dialogs behind `AppPageActions`, each naming its refusal inline through
+`errorMessage` rather than by toast; the order page's booking cards stay
+read-only and link to it.
 
 ## Gates
 
