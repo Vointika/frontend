@@ -3,8 +3,11 @@ import {
 	AppCard,
 	AppDetailField,
 	AppDetailSkeleton,
+	AppEmptyState,
 	AppPageHeader,
 	AppResourceView,
+	AppStaticTable,
+	type AppStaticTableColumn,
 	EmptyValue,
 	formatMoney,
 } from "@vointika/ui";
@@ -17,8 +20,11 @@ import { formatSlotDateTime } from "#/slots";
 import { bookingLineColumns, pricedLines } from "../columns";
 import { feeBearerLabel } from "../format";
 import { useOrder } from "../hooks/use-order";
-import type { Booking, Order } from "../types";
+import type { Booking, Order, Refund } from "../types";
 import { AppBookingStatusBadge } from "./AppBookingStatusBadge";
+import { AppOrderStatusBadge } from "./AppOrderStatusBadge";
+import { AppPaymentStateBadge } from "./AppPaymentStateBadge";
+import { AppRefundStatusBadge } from "./AppRefundStatusBadge";
 
 export const AppOrderDetail = ({
 	tourOperatorId,
@@ -84,6 +90,12 @@ const OrderView = ({
 						]}
 					/>
 				}
+				actions={
+					<>
+						<AppOrderStatusBadge status={order.status} />
+						<AppPaymentStateBadge state={order.paymentState} />
+					</>
+				}
 			/>
 
 			<AppCard title={m.customer()}>
@@ -126,10 +138,29 @@ const OrderView = ({
 					<AppDetailField label={m.operator_amount()}>
 						{formatMoney(order.fees.operatorAmount, order.currency, locale)}
 					</AppDetailField>
+					<AppDetailField label={m.refunded()}>
+						{formatMoney(order.refundedTotal, order.currency, locale)}
+					</AppDetailField>
 					<AppDetailField label={m.payment_reference()}>
 						<span className="font-mono text-sm">{order.paymentId}</span>
 					</AppDetailField>
 				</dl>
+			</AppCard>
+
+			<AppCard title={m.refunds()}>
+				{order.refunds.length === 0 ? (
+					<AppEmptyState
+						variant="inline"
+						title={m.no_refunds()}
+						description={m.no_refunds_body()}
+					/>
+				) : (
+					<AppStaticTable
+						columns={refundColumns(tourOperatorId, order, formatDateTime)}
+						rows={order.refunds}
+						rowKey={(refund) => refund.id}
+					/>
+				)}
 			</AppCard>
 
 			{order.bookings.map((booking) => (
@@ -144,6 +175,54 @@ const OrderView = ({
 		</>
 	);
 };
+
+const refundColumns = (
+	tourOperatorId: string,
+	order: Order,
+	formatDateTime: (iso: string) => string,
+): AppStaticTableColumn<Refund>[] => [
+	{
+		id: "createdAt",
+		header: m.date(),
+		cell: (refund) => formatDateTime(refund.createdAt),
+	},
+	{
+		id: "booking",
+		header: m.booking(),
+		cell: (refund) => {
+			const booking = order.bookings.find((b) => b.id === refund.bookingId);
+			return booking ? (
+				<AppResourceLink
+					to="/tour-operators/$tourOperatorId/bookings/$bookingId"
+					params={{ tourOperatorId, bookingId: booking.id }}
+					className="font-mono"
+				>
+					{booking.reference}
+				</AppResourceLink>
+			) : (
+				<EmptyValue />
+			);
+		},
+	},
+	{
+		id: "amount",
+		header: m.amount(),
+		numeric: true,
+		cell: (refund) => formatMoney(refund.amount, refund.currency, getLocale()),
+		emphasis: "strong",
+	},
+	{
+		id: "status",
+		header: m.status(),
+		cell: (refund) => <AppRefundStatusBadge status={refund.status} />,
+	},
+	{
+		id: "reason",
+		header: m.reason(),
+		cell: (refund) => refund.reason ?? <EmptyValue />,
+		emphasis: "muted",
+	},
+];
 
 const BookingCard = ({
 	tourOperatorId,
