@@ -3,20 +3,29 @@ import {
 	AppCard,
 	AppDetailField,
 	AppDetailSkeleton,
+	AppPageActions,
 	AppPageHeader,
 	AppResourceView,
 	EmptyValue,
 	formatMoney,
 } from "@vointika/ui";
-import { Ticket } from "lucide-react";
+import { ArrowRightLeft, Ban, Ticket, Undo2 } from "lucide-react";
+import { useState } from "react";
+import { AppActivityCard } from "#/audit";
+import { apiErrorMessage } from "#/lib/api-error";
 import * as m from "#/paraglide/messages";
 import { getLocale } from "#/paraglide/runtime";
+import { usePermissions } from "#/session";
 import { AppBackLink, AppBreadcrumb, AppResourceLink } from "#/shared/links";
 import { formatSlotDateTime } from "#/slots";
 import { bookingLineColumns, pricedLines } from "../columns";
 import { useBooking } from "../hooks/use-booking";
+import { useBookingActions } from "../hooks/use-booking-actions";
 import type { BookingManifestItem } from "../types";
 import { AppBookingStatusBadge } from "./AppBookingStatusBadge";
+import { AppCancelBookingDialog } from "./AppCancelBookingDialog";
+import { AppMoveBookingDialog } from "./AppMoveBookingDialog";
+import { AppRefundBookingDialog } from "./AppRefundBookingDialog";
 
 export const AppBookingDetail = ({
 	tourOperatorId,
@@ -65,12 +74,58 @@ const BookingView = ({
 }) => {
 	const currency = booking.currency;
 	const locale = getLocale();
+	const { canWrite } = usePermissions();
+	const { cancel, move, refund } = useBookingActions(tourOperatorId, booking);
+	const [cancelOpen, setCancelOpen] = useState(false);
+	const [moveOpen, setMoveOpen] = useState(false);
+	const [refundOpen, setRefundOpen] = useState(false);
+	const live = booking.status !== "CANCELLED";
+
+	const actions = [
+		...(live
+			? [
+					{
+						id: "move",
+						label: m.move_booking(),
+						icon: ArrowRightLeft,
+						onSelect: () => {
+							move.reset();
+							setMoveOpen(true);
+						},
+					},
+				]
+			: []),
+		{
+			id: "refund",
+			label: m.refund(),
+			icon: Undo2,
+			onSelect: () => {
+				refund.reset();
+				setRefundOpen(true);
+			},
+		},
+		...(live
+			? [
+					{
+						id: "cancel",
+						label: m.cancel_booking(),
+						icon: Ban,
+						variant: "destructive" as const,
+						onSelect: () => {
+							cancel.reset();
+							setCancelOpen(true);
+						},
+					},
+				]
+			: []),
+	];
 
 	return (
 		<>
 			<AppPageHeader
 				title={booking.reference}
 				description={booking.experienceName}
+				actions={<AppPageActions actions={actions} canWrite={canWrite} />}
 				breadcrumb={
 					<AppBreadcrumb
 						items={[
@@ -173,6 +228,43 @@ const BookingView = ({
 					</AppDetailField>
 				</dl>
 			</AppCard>
+
+			<AppActivityCard
+				tourOperatorId={tourOperatorId}
+				entityType="BOOKING"
+				entityId={booking.id}
+			/>
+
+			<AppCancelBookingDialog
+				open={cancelOpen}
+				onOpenChange={setCancelOpen}
+				pending={cancel.isPending}
+				errorMessage={cancel.error ? apiErrorMessage(cancel.error) : null}
+				onConfirm={(reason) =>
+					cancel.mutate({ reason }, { onSuccess: () => setCancelOpen(false) })
+				}
+			/>
+			<AppMoveBookingDialog
+				tourOperatorId={tourOperatorId}
+				open={moveOpen}
+				onOpenChange={setMoveOpen}
+				booking={booking}
+				pending={move.isPending}
+				errorMessage={move.error ? apiErrorMessage(move.error) : null}
+				onConfirm={(slotId) =>
+					move.mutate({ slotId }, { onSuccess: () => setMoveOpen(false) })
+				}
+			/>
+			<AppRefundBookingDialog
+				open={refundOpen}
+				onOpenChange={setRefundOpen}
+				booking={booking}
+				pending={refund.isPending}
+				errorMessage={refund.error ? apiErrorMessage(refund.error) : null}
+				onConfirm={(body) =>
+					refund.mutate(body, { onSuccess: () => setRefundOpen(false) })
+				}
+			/>
 		</>
 	);
 };

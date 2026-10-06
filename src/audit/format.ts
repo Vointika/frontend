@@ -75,6 +75,9 @@ const ACTION_LABELS: Record<string, () => string> = {
 	"metaobject.published": m.activity_action_metaobject_published,
 	"metaobject.unpublished": m.activity_action_metaobject_unpublished,
 	"metaobject.deleted": m.activity_action_metaobject_deleted,
+	"booking.cancelled": m.activity_action_booking_cancelled,
+	"booking.moved": m.activity_action_booking_moved,
+	"booking.refunded": m.activity_action_booking_refunded,
 	"metaobject.translation_updated": m.activity_action_translation_updated,
 	"metaobject.translation_cleared": m.activity_action_translation_deleted,
 	"experience.metafield_updated": m.activity_action_metafield_updated,
@@ -173,6 +176,13 @@ const ENTITY_TYPES: Record<
 		route: {
 			to: "/tour-operators/$tourOperatorId/availability/$slotId",
 			param: "slotId",
+		},
+	},
+	BOOKING: {
+		label: m.booking,
+		route: {
+			to: "/tour-operators/$tourOperatorId/bookings/$bookingId",
+			param: "bookingId",
 		},
 	},
 	AUDIENCE: {
