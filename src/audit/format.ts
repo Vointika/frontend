@@ -1,4 +1,5 @@
 import * as m from "#/paraglide/messages";
+import { formatWallClock, isWallClock } from "#/shared/wall-clock";
 
 const ACTION_LABELS: Record<string, () => string> = {
 	"tour_operator.created": m.activity_action_tour_operator_created,
@@ -149,6 +150,13 @@ export const formatAuditValue = (value: unknown): string => {
 	if (typeof value === "string" && /^[A-Z][A-Z0-9_]*$/.test(value)) {
 		const spaced = value.toLowerCase().replace(/_/g, " ");
 		return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+	}
+	if (typeof value === "object") {
+		// A departure is logged as { slotId, startAt }; its time is what the
+		// reader wants, the id is noise. Any other object reads as its values.
+		const fields = value as Record<string, unknown>;
+		if (isWallClock(fields.startAt)) return formatWallClock(fields.startAt);
+		return formatAuditValue(Object.values(fields));
 	}
 	return String(value);
 };
