@@ -55,6 +55,28 @@ describe("useMyAlertsForm", () => {
 		expect(body).toHaveBeenCalledWith({ subscribed: [] });
 	});
 
+	it("saves a type this build has no name for, as the backend sent it", async () => {
+		const body = vi.fn();
+		server.use(
+			http.put(URL_, async ({ request }) => {
+				body(await request.json());
+				return new HttpResponse(null, { status: 204 });
+			}),
+		);
+		const { result } = render({
+			alerts: [
+				{ type: "NEW_BOOKING", subscribed: false },
+				{ type: "OPERATION_CLOSED", subscribed: true },
+			],
+		});
+
+		await act(async () => {
+			await result.current.form.handleSubmit();
+		});
+
+		expect(body).toHaveBeenCalledWith({ subscribed: ["OPERATION_CLOSED"] });
+	});
+
 	it("refetches the alerts once saved, so the card shows what the backend holds", async () => {
 		server.use(http.put(URL_, () => new HttpResponse(null, { status: 204 })));
 		const { result, invalidated } = render(subscribed);
