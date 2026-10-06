@@ -84,6 +84,16 @@ export const orderInUsd: Order = {
 			requestedBy: "u-1",
 			createdAt: "2026-10-03T09:30:00Z",
 		},
+		{
+			id: "rf-3",
+			bookingId: "bk-2",
+			amount: 15,
+			currency: "USD",
+			status: "PENDING",
+			reason: null,
+			requestedBy: "u-1",
+			createdAt: "2026-10-04T08:00:00Z",
+		},
 	],
 	checkoutSessionId: "cs-1",
 	paymentId: "pi_123",
@@ -103,7 +113,10 @@ export const orderInUsd: Order = {
 	},
 	currency: "USD",
 	placedAt: "2026-10-01T12:00:00Z",
-	bookings: [bookingInUsd],
+	bookings: [
+		bookingInUsd,
+		{ ...bookingInUsd, id: "bk-2", position: 2, reference: "#1001-2" },
+	],
 };
 
 export const orderRowInUsd: OrderListItem = {

@@ -32,7 +32,7 @@ const serve = (order: typeof orderInUsd) =>
 	);
 
 describe("AppOrderDetail", () => {
-	it("lists every refund with its status and amount in the order's currency, against its booking", async () => {
+	it("lists every refund with its status and amount in the order's currency, each against its own booking", async () => {
 		serve(orderInUsd);
 		renderWithProviders(
 			<AppOrderDetail tourOperatorId={OP} orderId={orderInUsd.id} />,
@@ -47,6 +47,10 @@ describe("AppOrderDetail", () => {
 		const failed = screen.getByRole("row", { name: /Failed/ });
 		expect(failed).toHaveTextContent("$10.00");
 		expect(screen.queryByText(/€/)).toBeNull();
+
+		const pending = screen.getByRole("row", { name: /Pending/ });
+		expect(pending).toHaveTextContent("$15.00");
+		expect(within(pending).getByRole("link")).toHaveTextContent("#1001-2");
 	});
 
 	it("reads the refunded total from the order, not from the rows: a failed refund counts for nothing", async () => {
