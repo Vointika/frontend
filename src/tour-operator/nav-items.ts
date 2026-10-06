@@ -1,5 +1,6 @@
 import type { LinkProps } from "@tanstack/react-router";
 import {
+	Bell,
 	Building2,
 	CalendarDays,
 	Compass,
@@ -133,6 +134,14 @@ export const settingsSectionItems = (tourOperatorId: string): NavLeaf[] => [
 		icon: Globe,
 		link: {
 			to: "/tour-operators/$tourOperatorId/settings/translations",
+			params: { tourOperatorId },
+		},
+	},
+	{
+		label: m.notifications(),
+		icon: Bell,
+		link: {
+			to: "/tour-operators/$tourOperatorId/settings/notifications",
 			params: { tourOperatorId },
 		},
 	},

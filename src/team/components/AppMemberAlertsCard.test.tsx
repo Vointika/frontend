@@ -23,4 +23,25 @@ describe("AppMemberAlertsCard", () => {
 		const box = await screen.findByRole("checkbox", { name: "New booking" });
 		expect(box).toHaveAttribute("aria-checked", String(subscribed));
 	});
+
+	it("shows an alert type this build has no label for under its own name, and keeps the known one", async () => {
+		server.use(
+			http.get(`${API}/tour-operators/${OP}/members/me/alerts`, () =>
+				HttpResponse.json({
+					alerts: [
+						{ type: "NEW_BOOKING", subscribed: true },
+						{ type: "OPERATION_CLOSED", subscribed: false },
+					],
+				}),
+			),
+		);
+		renderWithProviders(<AppMemberAlertsCard tourOperatorId={OP} />);
+
+		expect(
+			await screen.findByRole("checkbox", { name: "Operation closed" }),
+		).toHaveAttribute("aria-checked", "false");
+		expect(
+			screen.getByRole("checkbox", { name: "New booking" }),
+		).toHaveAttribute("aria-checked", "true");
+	});
 });

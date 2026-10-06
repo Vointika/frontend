@@ -1,6 +1,7 @@
 import { act, renderHook, screen, waitFor } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it, vi } from "vitest";
+import { queryKeys } from "#/lib/query-keys";
 import { server } from "#/test/server";
 import { wrapperWithProviders } from "#/test/test-utils";
 import type { MemberAlerts } from "../types";
@@ -15,8 +16,12 @@ const subscribed: MemberAlerts = {
 };
 
 const render = (alerts: MemberAlerts) => {
-	const { Wrapper } = wrapperWithProviders();
-	return renderHook(() => useMyAlertsForm(OP, alerts), { wrapper: Wrapper });
+	const { Wrapper, queryClient } = wrapperWithProviders();
+	const invalidated = vi.spyOn(queryClient, "invalidateQueries");
+	return {
+		...renderHook(() => useMyAlertsForm(OP, alerts), { wrapper: Wrapper }),
+		invalidated: () => invalidated.mock.calls.map((call) => call[0]?.queryKey),
+	};
 };
 
 describe("useMyAlertsForm", () => {
@@ -48,6 +53,18 @@ describe("useMyAlertsForm", () => {
 		});
 
 		expect(body).toHaveBeenCalledWith({ subscribed: [] });
+	});
+
+	it("refetches the alerts once saved, so the card shows what the backend holds", async () => {
+		server.use(http.put(URL_, () => new HttpResponse(null, { status: 204 })));
+		const { result, invalidated } = render(subscribed);
+
+		await act(async () => {
+			await result.current.form.handleSubmit();
+		});
+
+		expect(invalidated()).toContainEqual([...queryKeys.myAlerts(OP)]);
+		expect(invalidated()).toContainEqual([...queryKeys.activity(OP)]);
 	});
 
 	it("names a refused save on the form, not in a toast", async () => {

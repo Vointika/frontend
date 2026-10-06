@@ -1,22 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppPageHeader, AppPageShell } from "@vointika/ui";
-import { AppAccountSettings } from "#/auth";
 import * as m from "#/paraglide/messages";
 import { AppBreadcrumb } from "#/shared/links";
+import { AppMemberAlertsCard } from "#/team";
 
 export const Route = createFileRoute(
-	"/(app)/tour-operators/$tourOperatorId/settings/account/",
+	"/(app)/tour-operators/$tourOperatorId/settings/notifications/",
 )({
-	component: AccountSettingsPage,
+	component: NotificationsSettingsPage,
 });
 
-function AccountSettingsPage() {
+function NotificationsSettingsPage() {
 	const { tourOperatorId } = Route.useParams();
 	return (
 		<AppPageShell variant="form">
 			<AppPageHeader
-				title={m.account()}
-				description={m.account_description()}
+				title={m.notifications()}
+				description={m.notifications_description()}
 				breadcrumb={
 					<AppBreadcrumb
 						items={[
@@ -25,12 +25,12 @@ function AccountSettingsPage() {
 								to: "/tour-operators/$tourOperatorId/settings",
 								params: { tourOperatorId },
 							},
-							{ label: m.account() },
+							{ label: m.notifications() },
 						]}
 					/>
 				}
 			/>
-			<AppAccountSettings />
+			<AppMemberAlertsCard tourOperatorId={tourOperatorId} />
 		</AppPageShell>
 	);
 }
