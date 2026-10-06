@@ -48,9 +48,10 @@ describe("AppRefundBookingDialog", () => {
 		expect(onConfirm).toHaveBeenCalledWith({ amount: 12.5, reason: null });
 	});
 
-	it("names the booking's total in its own currency so the reader knows the ceiling", () => {
+	it("names the booking's total in its own currency without presenting it as the ceiling", () => {
 		render(() => {});
 
-		expect(screen.getByText(/\$338\.00/)).toBeInTheDocument();
+		const body = screen.getByText(/\$338\.00/);
+		expect(body).toHaveTextContent(/what remains refundable can be less/);
 	});
 });

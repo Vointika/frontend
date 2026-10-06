@@ -1,3 +1,4 @@
+import { screen } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it, vi } from "vitest";
 import { queryKeys } from "#/lib/query-keys";
@@ -90,11 +91,31 @@ describe("useBookingActions", () => {
 
 		expect(sent).toEqual({ amount: 12.5, reason: null });
 		expect(written).not.toHaveBeenCalled();
+		expect(await screen.findByText("Refund requested")).toBeInTheDocument();
 		expect(invalidated()).toEqual([
 			["bookings", OP],
 			["orders", OP, "ord-1"],
 			["orders", OP],
 			["activity", OP],
 		]);
+	});
+
+	it("says the refund is sent only once the provider has sent it", async () => {
+		server.use(
+			http.post(`${BASE}/refunds`, () =>
+				HttpResponse.json(
+					{ id: "rf-1", bookingId: "bk-1", amount: 12.5, status: "SUCCEEDED" },
+					{ status: 201 },
+				),
+			),
+		);
+		const { result } = renderActions(() => useBookingActions(OP, bookingInUsd));
+
+		await fire(() =>
+			result.current.refund.mutateAsync({ amount: 12.5, reason: null }),
+		);
+
+		expect(await screen.findByText("Refund sent")).toBeInTheDocument();
+		expect(screen.queryByText("Refund requested")).toBeNull();
 	});
 });

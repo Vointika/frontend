@@ -669,7 +669,7 @@
 	"no_other_departures": "Esta experiencia no tiene otra salida próxima a la que mover.",
 	"refund": "Reembolsar",
 	"refund_booking_title": "Reembolsar esta reserva",
-	"refund_booking_body": "El dinero vuelve al cliente contra esta reserva, en {currency}. Se pueden hacer varios reembolsos parciales; la comisión de reserva nunca se reembolsa. La reserva se vendió por {total}.",
+	"refund_booking_body": "El dinero vuelve al cliente contra esta reserva, en {currency}. Se pueden hacer varios reembolsos parciales. La reserva se vendió por {total}, pero lo que queda por reembolsar puede ser menos: la comisión de reserva nunca se reembolsa y los reembolsos anteriores cuentan. Un importe mayor se rechaza indicando cuánto queda.",
 	"refund_amount": "Importe",
 	"refund_requested": "Reembolso solicitado",
 	"refund_sent": "Reembolso enviado",

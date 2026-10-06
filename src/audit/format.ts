@@ -185,13 +185,6 @@ const ENTITY_TYPES: Record<
 			param: "bookingId",
 		},
 	},
-	ORDER: {
-		label: m.order,
-		route: {
-			to: "/tour-operators/$tourOperatorId/orders/$orderId",
-			param: "orderId",
-		},
-	},
 	AUDIENCE: {
 		label: m.audience,
 		route: {

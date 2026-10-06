@@ -51,7 +51,7 @@ describe("movableDepartures", () => {
 });
 
 describe("AppMoveBookingDialog", () => {
-	it("asks the backend for this experience's live departures and lists the ones still to come", async () => {
+	it("asks the backend for this experience's departures with seats and lists the ones still to come", async () => {
 		const user = userEvent.setup();
 		let url = "";
 		server.use(
@@ -84,7 +84,9 @@ describe("AppMoveBookingDialog", () => {
 		});
 		const sent = new URL(url);
 		expect(sent.searchParams.get("filter[experienceId][in]")).toBe("exp-1");
-		expect(sent.searchParams.get("filter[status][not_in]")).toBe("CANCELLED");
+		expect(sent.searchParams.get("filter[status][not_in]")).toBe(
+			"CANCELLED,SOLD_OUT",
+		);
 		expect(sent.searchParams.get("sort")).toBe("startAt");
 
 		expect(

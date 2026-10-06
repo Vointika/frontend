@@ -54,7 +54,7 @@ export const AppMoveBookingDialog = ({
 	const [slotId, setSlotId] = useState("");
 	const slots = useAllPages<Slot>(
 		queryKeys.slots(tourOperatorId),
-		`/tour-operators/${tourOperatorId}/slots?filter[experienceId][in]=${booking.experienceId}&filter[status][not_in]=CANCELLED&sort=startAt`,
+		`/tour-operators/${tourOperatorId}/slots?filter[experienceId][in]=${booking.experienceId}&filter[status][not_in]=CANCELLED,SOLD_OUT&sort=startAt`,
 		{ enabled: open },
 	);
 
