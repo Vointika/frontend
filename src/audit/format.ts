@@ -19,6 +19,7 @@ const ACTION_LABELS: Record<string, () => string> = {
 	"member.removed": m.activity_action_member_removed,
 	"ownership.transferred": m.activity_action_ownership_transferred,
 	"member.invited": m.activity_action_member_invited,
+	"member.alerts_changed": m.activity_action_member_alerts_changed,
 	"invitation.resent": m.activity_action_invitation_resent,
 	"invitation.revoked": m.activity_action_invitation_revoked,
 	"invitation.accepted": m.activity_action_invitation_accepted,
