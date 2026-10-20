@@ -11,6 +11,23 @@ export interface MenuItemFormNode {
 	children: MenuItemFormNode[];
 }
 
+// The backend's rule (WebUrl): a URI with an http or https scheme and a host.
+// The browser's URL repairs what Java's URI refuses (`http:///x` and
+// `https:/x` gain a host, a space is encoded), so the shape is checked as
+// written: the scheme, `//`, then a host character, and no whitespace.
+const WEB_URL = /^https?:\/\/[^/?#\s]/i;
+
+const isWebUrl = (raw: string): boolean => {
+	const value = raw.trim();
+	if (!WEB_URL.test(value) || /\s/.test(value)) return false;
+	try {
+		new URL(value);
+		return true;
+	} catch {
+		return false;
+	}
+};
+
 const menuItemNodeSchema: z.ZodType<MenuItemFormNode, MenuItemFormNode> =
 	z.lazy(() =>
 		z
@@ -35,12 +52,20 @@ const menuItemNodeSchema: z.ZodType<MenuItemFormNode, MenuItemFormNode> =
 						message: m.menu_items_target_required(),
 					});
 				}
-				if (node.linkType === "EXTERNAL_URL" && !node.url.trim()) {
-					ctx.addIssue({
-						code: "custom",
-						path: ["url"],
-						message: m.menu_items_url_required(),
-					});
+				if (node.linkType === "EXTERNAL_URL") {
+					if (!node.url.trim()) {
+						ctx.addIssue({
+							code: "custom",
+							path: ["url"],
+							message: m.menu_items_url_required(),
+						});
+					} else if (!isWebUrl(node.url)) {
+						ctx.addIssue({
+							code: "custom",
+							path: ["url"],
+							message: m.menu_items_url_invalid(),
+						});
+					}
 				}
 			}),
 	) as z.ZodType<MenuItemFormNode, MenuItemFormNode>;

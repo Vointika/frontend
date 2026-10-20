@@ -620,6 +620,7 @@
 	"menu_items_title_required": "Every item needs a title.",
 	"menu_items_target_required": "Every experience, page or category link needs a target.",
 	"menu_items_url_required": "Every external link needs a URL.",
+	"menu_items_url_invalid": "Enter a full web address, like https://example.com.",
 	"activity_action_menu_created": "created the menu",
 	"activity_action_menu_renamed": "renamed the menu",
 	"activity_action_menu_items_replaced": "updated the menu's items",

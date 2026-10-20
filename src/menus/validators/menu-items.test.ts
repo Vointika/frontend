@@ -62,4 +62,53 @@ describe("menuItemsSchema", () => {
 			}).success,
 		).toBe(true);
 	});
+
+	const urlIssue = (url: string) =>
+		menuItemsSchema
+			.safeParse({ items: [node({ linkType: "EXTERNAL_URL", url })] })
+			.error?.issues.find((i) => i.path.join(".") === "items.0.url")?.message;
+
+	it.each([
+		"https://www.instagram.com/scapepark",
+		"http://localhost:8080/policies/cancellation",
+		"  https://example.com  ",
+	])("accepts the web address %j", (url) => {
+		expect(urlIssue(url)).toBeUndefined();
+	});
+
+	it.each([
+		"not a url",
+		"www.instagram.com/scapepark",
+		"ftp://example.com/file",
+		"mailto:hello@example.com",
+		"https://",
+		"https://exa mple.com",
+		"https://example.com/a b",
+		"http:///path",
+		"https:/example.com",
+		"http://:80",
+	])("refuses %j on the item's own URL field, before the backend does", (url) => {
+		expect(urlIssue(url)).toBe(
+			"Enter a full web address, like https://example.com.",
+		);
+	});
+
+	it("names a malformed URL on the nested item that has it", () => {
+		expect(
+			paths({
+				items: [
+					node({
+						title: "Social",
+						children: [
+							node({
+								title: "Instagram",
+								linkType: "EXTERNAL_URL",
+								url: "instagram",
+							}),
+						],
+					}),
+				],
+			}),
+		).toEqual(["items.0.children.0.url"]);
+	});
 });
