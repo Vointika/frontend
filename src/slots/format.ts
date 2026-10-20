@@ -1,6 +1,7 @@
 import type { AppBadgeProps } from "@vointika/ui";
 import * as m from "#/paraglide/messages";
 import { getLocale } from "#/paraglide/runtime";
+import { formatWallClock } from "#/shared/wall-clock";
 import {
 	SLOT_STATUSES,
 	type SlotAudiencePrice,
@@ -18,21 +19,7 @@ export const formatDayName = (day: number): string => {
 	}).format(date);
 };
 
-const parseWallClock = (dateTime: string): Date | null => {
-	const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(dateTime);
-	if (!match) return null;
-	const [, y, mo, d, h, mn] = match.map(Number);
-	return new Date(y ?? 1970, (mo ?? 1) - 1, d ?? 1, h ?? 0, mn ?? 0);
-};
-
-export const formatSlotDateTime = (dateTime: string): string => {
-	const date = parseWallClock(dateTime);
-	if (!date) return dateTime;
-	return new Intl.DateTimeFormat(getLocale(), {
-		dateStyle: "medium",
-		timeStyle: "short",
-	}).format(date);
-};
+export const formatSlotDateTime = formatWallClock;
 
 export const formatSlotDuration = (minutes: number): string => {
 	const h = Math.floor(minutes / 60);
