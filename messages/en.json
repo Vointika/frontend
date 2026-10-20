@@ -679,7 +679,6 @@
 	"refund_booking_body": "Money goes back to the customer against this booking, in {currency}. Several partial refunds may be made. The booking was sold for {total}, but what remains refundable can be less: the booking fee is never refunded, and earlier refunds count. An amount over it is refused with what remains.",
 	"refund_amount": "Amount",
 	"refund_requested": "Refund requested",
-	"refund_sent": "Refund sent",
 	"reason": "Reason",
 	"reason_optional_hint": "Optional. Your own record; the customer does not see it.",
 	"validation_amount_positive": "Enter an amount greater than 0",

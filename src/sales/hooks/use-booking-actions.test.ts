@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { queryKeys } from "#/lib/query-keys";
 import { fire, renderActions } from "#/test/actions";
 import { server } from "#/test/server";
@@ -11,111 +11,84 @@ const API = import.meta.env.VITE_API_URL ?? "http://localhost:8080/api";
 const OP = "op-1";
 const BASE = `${API}/tour-operators/${OP}/bookings/${bookingInUsd.id}`;
 
+const answeringNothing = (path: string, body: (sent: unknown) => void) =>
+	http.post(`${BASE}/${path}`, async ({ request }) => {
+		body(await request.json());
+		return new HttpResponse(null, { status: 204 });
+	});
+
+const renderWithBookingCached = () => {
+	const rendered = renderActions(() => useBookingActions(OP, bookingInUsd));
+	rendered.queryClient.setQueryDefaults(
+		queryKeys.booking(OP, bookingInUsd.id),
+		{ gcTime: Number.POSITIVE_INFINITY },
+	);
+	rendered.queryClient.setQueryData(
+		queryKeys.booking(OP, bookingInUsd.id),
+		bookingInUsd,
+	);
+	return rendered;
+};
+
 describe("useBookingActions", () => {
-	it("cancel posts the reason, writes the answer into the booking cache and refreshes what the cancel touched", async () => {
+	it("cancel posts the reason, keeps the cached booking whole, and reads it again", async () => {
 		let sent: unknown;
-		const refreshed = { ...bookingInUsd, status: "CANCELLED" };
-		server.use(
-			http.post(`${BASE}/cancel`, async ({ request }) => {
-				sent = await request.json();
-				return HttpResponse.json(refreshed);
-			}),
-		);
-		const { result, invalidated, queryClient } = renderActions(() =>
-			useBookingActions(OP, bookingInUsd),
-		);
-		const written = vi.spyOn(queryClient, "setQueryData");
+		server.use(answeringNothing("cancel", (body) => (sent = body)));
+		const { result, invalidated, queryClient } = renderWithBookingCached();
 
 		await fire(() => result.current.cancel.mutateAsync({ reason: "No-show" }));
 
 		expect(sent).toEqual({ reason: "No-show" });
-		expect(written).toHaveBeenCalledWith(
-			queryKeys.booking(OP, "bk-1"),
-			refreshed,
-		);
+		expect(
+			queryClient.getQueryData(queryKeys.booking(OP, bookingInUsd.id)),
+		).toEqual(bookingInUsd);
 		expect(invalidated()).toEqual([
 			["bookings", OP],
-			["orders", OP, "ord-1"],
 			["orders", OP],
 			["activity", OP],
 			["slots", OP],
-			["slots", OP, "slot-1"],
+		]);
+		expect(queryKeys.booking(OP, bookingInUsd.id).slice(0, 2)).toEqual([
+			...queryKeys.bookings(OP),
 		]);
 	});
 
-	it("move posts the new departure and refreshes both departures", async () => {
+	it("move posts the new departure, keeps the cached booking whole, and reads both departures again", async () => {
 		let sent: unknown;
-		const refreshed = { ...bookingInUsd, slotId: "slot-2" };
-		server.use(
-			http.post(`${BASE}/move`, async ({ request }) => {
-				sent = await request.json();
-				return HttpResponse.json(refreshed);
-			}),
-		);
-		const { result, invalidated, queryClient } = renderActions(() =>
-			useBookingActions(OP, bookingInUsd),
-		);
-		const written = vi.spyOn(queryClient, "setQueryData");
+		server.use(answeringNothing("move", (body) => (sent = body)));
+		const { result, invalidated, queryClient } = renderWithBookingCached();
 
 		await fire(() => result.current.move.mutateAsync({ slotId: "slot-2" }));
 
 		expect(sent).toEqual({ slotId: "slot-2" });
-		expect(written).toHaveBeenCalledWith(
-			queryKeys.booking(OP, "bk-1"),
-			refreshed,
-		);
-		expect(invalidated()).toContainEqual(["slots", OP, "slot-1"]);
-		expect(invalidated()).toContainEqual(["slots", OP, "slot-2"]);
-		expect(invalidated()).toContainEqual(["orders", OP, "ord-1"]);
+		expect(
+			queryClient.getQueryData(queryKeys.booking(OP, bookingInUsd.id)),
+		).toEqual(bookingInUsd);
+		expect(invalidated()).toContainEqual(["bookings", OP]);
+		expect(invalidated()).toContainEqual(["slots", OP]);
+		expect(queryKeys.slot(OP, "slot-2").slice(0, 2)).toEqual([
+			...queryKeys.slots(OP),
+		]);
 	});
 
-	it("refund posts the amount and reason to the refunds collection and leaves the booking as it is", async () => {
+	it("refund posts the amount and reason to the refunds collection and says it is requested", async () => {
 		let sent: unknown;
-		server.use(
-			http.post(`${BASE}/refunds`, async ({ request }) => {
-				sent = await request.json();
-				return HttpResponse.json(
-					{ id: "rf-1", bookingId: "bk-1", amount: 12.5, status: "PENDING" },
-					{ status: 201 },
-				);
-			}),
-		);
-		const { result, invalidated, queryClient } = renderActions(() =>
-			useBookingActions(OP, bookingInUsd),
-		);
-		const written = vi.spyOn(queryClient, "setQueryData");
+		server.use(answeringNothing("refunds", (body) => (sent = body)));
+		const { result, invalidated, queryClient } = renderWithBookingCached();
 
 		await fire(() =>
 			result.current.refund.mutateAsync({ amount: 12.5, reason: null }),
 		);
 
 		expect(sent).toEqual({ amount: 12.5, reason: null });
-		expect(written).not.toHaveBeenCalled();
+		expect(
+			queryClient.getQueryData(queryKeys.booking(OP, bookingInUsd.id)),
+		).toEqual(bookingInUsd);
 		expect(await screen.findByText("Refund requested")).toBeInTheDocument();
 		expect(invalidated()).toEqual([
 			["bookings", OP],
-			["orders", OP, "ord-1"],
 			["orders", OP],
 			["activity", OP],
 		]);
-	});
-
-	it("says the refund is sent only once the provider has sent it", async () => {
-		server.use(
-			http.post(`${BASE}/refunds`, () =>
-				HttpResponse.json(
-					{ id: "rf-1", bookingId: "bk-1", amount: 12.5, status: "SUCCEEDED" },
-					{ status: 201 },
-				),
-			),
-		);
-		const { result } = renderActions(() => useBookingActions(OP, bookingInUsd));
-
-		await fire(() =>
-			result.current.refund.mutateAsync({ amount: 12.5, reason: null }),
-		);
-
-		expect(await screen.findByText("Refund sent")).toBeInTheDocument();
-		expect(screen.queryByText("Refund requested")).toBeNull();
 	});
 });

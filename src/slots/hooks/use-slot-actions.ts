@@ -5,15 +5,15 @@ import { authApi } from "#/lib/api";
 import { apiErrorMessage } from "#/lib/api-error";
 import { queryKeys } from "#/lib/query-keys";
 import * as m from "#/paraglide/messages";
-import type { Slot } from "../types";
 
 export const useSlotActions = (tourOperatorId: string, slotId: string) => {
 	const queryClient = useQueryClient();
 	const toast = useAppToast();
 	const base = `/tour-operators/${tourOperatorId}/slots/${slotId}`;
 
-	const applyRefreshed = (slot: Slot) => {
-		queryClient.setQueryData(queryKeys.slot(tourOperatorId, slotId), slot);
+	// Both writes answer 204 with nothing; `slots` is a prefix of the slot's
+	// own key, so invalidating it reads the slot again.
+	const refetch = () => {
 		queryClient.invalidateQueries({
 			queryKey: queryKeys.slots(tourOperatorId),
 		});
@@ -22,10 +22,12 @@ export const useSlotActions = (tourOperatorId: string, slotId: string) => {
 		});
 	};
 
-	const cancel = useMutation<Slot, AxiosError>({
-		mutationFn: async () => (await authApi.post<Slot>(`${base}/cancel`)).data,
-		onSuccess: (slot) => {
-			applyRefreshed(slot);
+	const cancel = useMutation<void, AxiosError>({
+		mutationFn: async () => {
+			await authApi.post(`${base}/cancel`);
+		},
+		onSuccess: () => {
+			refetch();
 			toast.success(m.slot_cancelled());
 		},
 		onError: (error) => toast.error(apiErrorMessage(error)),
@@ -40,12 +42,7 @@ export const useSlotActions = (tourOperatorId: string, slotId: string) => {
 			await authApi.patch(base, { capacities });
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.slots(tourOperatorId),
-			});
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.activity(tourOperatorId),
-			});
+			refetch();
 			toast.updated(m.availability());
 		},
 		onError: (error) => toast.error(apiErrorMessage(error)),
