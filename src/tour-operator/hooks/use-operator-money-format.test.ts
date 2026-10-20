@@ -59,6 +59,23 @@ describe("useOperatorMoneyFormatForm", () => {
 		});
 	});
 
+	it("sends a blank price pattern as null too", async () => {
+		const body = vi.fn();
+		server.use(
+			http.patch(URL_, async ({ request }) => {
+				body(await request.json());
+				return new HttpResponse(null, { status: 204 });
+			}),
+		);
+		const { result } = render("€{{amount}}", "€{{amount}} EUR");
+
+		await submit(result.current.form, { format: "   " });
+
+		expect(body).toHaveBeenCalledWith({
+			money: { format: null, withCurrencyFormat: "€{{amount}} EUR" },
+		});
+	});
+
 	it("names a refused save on the form, not in a toast", async () => {
 		server.use(
 			http.patch(URL_, () =>
