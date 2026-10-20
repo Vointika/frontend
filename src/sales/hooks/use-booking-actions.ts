@@ -4,8 +4,11 @@ import type { AxiosError } from "axios";
 import { authApi } from "#/lib/api";
 import { queryKeys } from "#/lib/query-keys";
 import * as m from "#/paraglide/messages";
-import type { BookingManifestItem, Refund } from "../types";
+import type { BookingManifestItem } from "../types";
 
+// The three transitions answer 204 with nothing, so the booking is read
+// again: `bookings` is a prefix of the booking's own key, `orders` of its
+// order's.
 export const useBookingActions = (
 	tourOperatorId: string,
 	booking: BookingManifestItem,
@@ -17,66 +20,43 @@ export const useBookingActions = (
 	const invalidate = (keys: readonly (readonly unknown[])[]) => {
 		for (const queryKey of keys) queryClient.invalidateQueries({ queryKey });
 	};
-	const orderKeys = [
+	const salesKeys = [
 		queryKeys.bookings(tourOperatorId),
-		queryKeys.order(tourOperatorId, booking.orderId),
 		queryKeys.orders(tourOperatorId),
 		queryKeys.activity(tourOperatorId),
 	];
-	const applyRefreshed = (refreshed: BookingManifestItem) => {
-		queryClient.setQueryData(
-			queryKeys.booking(tourOperatorId, booking.id),
-			refreshed,
-		);
-	};
 
-	const cancel = useMutation<
-		BookingManifestItem,
-		AxiosError,
-		{ reason: string | null }
-	>({
-		mutationFn: async (body) =>
-			(await authApi.post<BookingManifestItem>(`${base}/cancel`, body)).data,
-		onSuccess: (refreshed) => {
-			applyRefreshed(refreshed);
-			invalidate([
-				...orderKeys,
-				queryKeys.slots(tourOperatorId),
-				queryKeys.slot(tourOperatorId, booking.slotId),
-			]);
+	const cancel = useMutation<void, AxiosError, { reason: string | null }>({
+		mutationFn: async (body) => {
+			await authApi.post(`${base}/cancel`, body);
+		},
+		onSuccess: () => {
+			invalidate([...salesKeys, queryKeys.slots(tourOperatorId)]);
 			toast.success(m.booking_cancelled());
 		},
 	});
 
-	const move = useMutation<BookingManifestItem, AxiosError, { slotId: string }>(
-		{
-			mutationFn: async (body) =>
-				(await authApi.post<BookingManifestItem>(`${base}/move`, body)).data,
-			onSuccess: (refreshed, { slotId }) => {
-				applyRefreshed(refreshed);
-				invalidate([
-					...orderKeys,
-					queryKeys.slots(tourOperatorId),
-					queryKeys.slot(tourOperatorId, booking.slotId),
-					queryKeys.slot(tourOperatorId, slotId),
-				]);
-				toast.success(m.booking_moved());
-			},
+	const move = useMutation<void, AxiosError, { slotId: string }>({
+		mutationFn: async (body) => {
+			await authApi.post(`${base}/move`, body);
 		},
-	);
+		onSuccess: () => {
+			invalidate([...salesKeys, queryKeys.slots(tourOperatorId)]);
+			toast.success(m.booking_moved());
+		},
+	});
 
 	const refund = useMutation<
-		Refund,
+		void,
 		AxiosError,
 		{ amount: number; reason: string | null }
 	>({
-		mutationFn: async (body) =>
-			(await authApi.post<Refund>(`${base}/refunds`, body)).data,
-		onSuccess: (sent) => {
-			invalidate(orderKeys);
-			toast.success(
-				sent.status === "SUCCEEDED" ? m.refund_sent() : m.refund_requested(),
-			);
+		mutationFn: async (body) => {
+			await authApi.post(`${base}/refunds`, body);
+		},
+		onSuccess: () => {
+			invalidate(salesKeys);
+			toast.success(m.refund_requested());
 		},
 	});
 

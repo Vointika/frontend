@@ -11,22 +11,31 @@ const OP = "op-1";
 const ID = "slot-1";
 const BASE = `${API}/tour-operators/${OP}/slots/${ID}`;
 
-const REFRESHED = {
+const CACHED = {
 	id: ID,
 	context: "slots",
-	status: "SOLD_OUT",
+	status: "AVAILABLE",
 };
 
 describe("useSlotActions", () => {
-	it("writes the returned slot into the detail cache and invalidates the list", async () => {
-		server.use(http.post(`${BASE}/cancel`, () => HttpResponse.json(REFRESHED)));
+	it("cancel keeps the cached slot whole, the POST answering nothing, and reads it again", async () => {
+		server.use(
+			http.post(
+				`${BASE}/cancel`,
+				() => new HttpResponse(null, { status: 204 }),
+			),
+		);
 		const { result, invalidated, queryClient } = renderActions(() =>
 			useSlotActions(OP, ID),
 		);
+		queryClient.setQueryDefaults(queryKeys.slot(OP, ID), {
+			gcTime: Number.POSITIVE_INFINITY,
+		});
+		queryClient.setQueryData(queryKeys.slot(OP, ID), CACHED);
 
 		await fire(() => result.current.cancel.mutateAsync());
 
-		expect(queryClient.getQueryData(["slots", OP, ID])).toEqual(REFRESHED);
+		expect(queryClient.getQueryData(queryKeys.slot(OP, ID))).toEqual(CACHED);
 		expect(invalidated()).toEqual([
 			["slots", OP],
 			["activity", OP],
