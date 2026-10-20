@@ -1,3 +1,4 @@
+export { AppMoneyFormatCard } from "./components/AppMoneyFormatCard";
 export { AppOperatorBrandCard } from "./components/AppOperatorBrandCard";
 export { AppOperatorColorsCard } from "./components/AppOperatorColorsCard";
 export { AppOperatorDetailsCard } from "./components/AppOperatorDetailsCard";

@@ -5,6 +5,7 @@ import * as m from "#/paraglide/messages";
 import { useCurrentTourOperator, usePermissions } from "#/session";
 import { AppBreadcrumb } from "#/shared/links";
 import {
+	AppMoneyFormatCard,
 	AppOperatorBrandCard,
 	AppOperatorColorsCard,
 	AppOperatorDetailsCard,
@@ -63,6 +64,10 @@ function GeneralSettingsPage() {
 						canWrite={canWrite}
 					/>
 					<AppStorefrontPasswordCard
+						tourOperatorId={operator.id}
+						canWrite={canWrite}
+					/>
+					<AppMoneyFormatCard
 						tourOperatorId={operator.id}
 						canWrite={canWrite}
 					/>
