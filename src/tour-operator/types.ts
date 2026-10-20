@@ -67,6 +67,12 @@ export interface TourOperatorDetails {
 	seo: OperatorSeo;
 	locales: OperatorLocales;
 	storefrontPassword: StorefrontPasswordSettings;
+	money: MoneyFormatSettings;
+}
+
+export interface MoneyFormatSettings {
+	format: string | null;
+	withCurrencyFormat: string | null;
 }
 
 export interface StorefrontPasswordSettings {

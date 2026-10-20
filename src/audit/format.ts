@@ -92,6 +92,7 @@ const ACTION_LABELS: Record<string, () => string> = {
 	"menu.deleted": m.activity_action_menu_deleted,
 	"tour_operator.storefront_password_updated":
 		m.activity_action_storefront_password_updated,
+	"tour_operator.money_format_updated": m.activity_action_money_format_updated,
 	"contact_message.deleted": m.activity_action_contact_message_deleted,
 };
 
@@ -116,6 +117,8 @@ const FIELD_LABELS: Record<string, () => string> = {
 	primaryLocale: m.primary_language,
 	supportedLocales: m.supported_languages,
 	value: m.value,
+	moneyFormat: m.money_format_price,
+	moneyWithCurrencyFormat: m.money_format_with_currency,
 };
 
 export const formatAuditActor = (entry: {
