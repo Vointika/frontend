@@ -8,6 +8,7 @@ export { AppOperatorSeoCard } from "./components/AppOperatorSeoCard";
 export { AppOperatorSocialLinksCard } from "./components/AppOperatorSocialLinksCard";
 export { AppOperatorTranslations } from "./components/AppOperatorTranslations";
 export { AppSettingsSidebar } from "./components/AppSettingsSidebar";
+export { AppStorefrontCard } from "./components/AppStorefrontCard";
 export { AppStorefrontPasswordCard } from "./components/AppStorefrontPasswordCard";
 export { AppTourOperatorForm } from "./components/AppTourOperatorForm";
 export { AppTourOperatorSidebar } from "./components/AppTourOperatorSidebar";

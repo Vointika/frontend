@@ -11,6 +11,7 @@ import {
 	AppOperatorDetailsCard,
 	AppOperatorSeoCard,
 	AppOperatorSocialLinksCard,
+	AppStorefrontCard,
 	AppStorefrontPasswordCard,
 } from "#/tour-operator";
 
@@ -43,6 +44,7 @@ function GeneralSettingsPage() {
 			/>
 			{operator && (
 				<>
+					<AppStorefrontCard tourOperatorId={operator.id} />
 					<AppOperatorDetailsCard
 						tourOperatorId={operator.id}
 						canWrite={canWrite}
