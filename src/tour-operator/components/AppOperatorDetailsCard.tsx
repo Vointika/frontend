@@ -14,7 +14,7 @@ import {
 } from "@vointika/ui";
 import { useState } from "react";
 import * as m from "#/paraglide/messages";
-import { useCurrencies, useTimezones } from "#/reference";
+import { AppTimezoneLabel, useCurrencies, useTimezones } from "#/reference";
 import { addressLines } from "../format";
 import {
 	useOperatorDetails,
@@ -142,7 +142,7 @@ const DetailsForm = ({
 						>
 							{timezones.data?.map((tz) => (
 								<SelectItem key={tz.id} value={tz.id}>
-									{tz.name}
+									<AppTimezoneLabel timezone={tz} />
 								</SelectItem>
 							))}
 						</AppSelectField>

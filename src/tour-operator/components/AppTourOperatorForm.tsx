@@ -11,7 +11,7 @@ import {
 } from "@vointika/ui";
 import { AppAuthShell, getPostLoginPath, useAuth } from "#/auth";
 import * as m from "#/paraglide/messages";
-import { useCurrencies, useTimezones } from "#/reference";
+import { AppTimezoneLabel, useCurrencies, useTimezones } from "#/reference";
 import { useTourOperatorForm } from "../hooks/use-tour-operator-form";
 import { AppOperatorAddressFields } from "./AppOperatorAddressFields";
 
@@ -85,16 +85,7 @@ export const AppTourOperatorForm = () => {
 									>
 										{timezones.map((t) => (
 											<SelectItem key={t.id} value={t.id}>
-												{t.country.flagUrl && (
-													<img
-														src={t.country.flagUrl}
-														alt=""
-														className="h-3.5 w-5 shrink-0 rounded-xs object-cover"
-													/>
-												)}
-												<span>
-													{t.cityName}, {t.country.name}
-												</span>
+												<AppTimezoneLabel timezone={t} />
 											</SelectItem>
 										))}
 									</AppSelectField>
