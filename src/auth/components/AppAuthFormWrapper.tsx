@@ -33,6 +33,7 @@ export const AppAuthFormWrapper = ({
 					)}
 				</div>
 				<form
+					noValidate
 					onSubmit={(e) => {
 						e.preventDefault();
 						form.handleSubmit();
