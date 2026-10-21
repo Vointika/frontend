@@ -777,7 +777,7 @@
 	"brand_social_links_empty": "Aún no hay enlaces a redes sociales.",
 	"brand_social_links_saved": "Redes sociales guardadas",
 	"validation_hex_color": "Usa un color hexadecimal de seis dígitos como #0b3d5c",
-	"validation_social_url": "Debe empezar por http:// o https://",
+	"validation_web_url": "Escribe una dirección web completa, como https://example.com.",
 	"validation_social_duplicate": "Un enlace por plataforma",
 	"social_facebook": "Facebook",
 	"social_instagram": "Instagram",

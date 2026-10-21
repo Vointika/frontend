@@ -70,8 +70,16 @@ describe("brandSocialLinksSchema", () => {
 		"data:text/html,x",
 		"ftp://x.test",
 		"acme",
+		"http:///instagram.com/acme",
+		"https://insta gram.com/acme",
 	])("rejects %o", (url) => {
 		expect(links([{ platform: "INSTAGRAM", url }]).success).toBe(false);
+	});
+
+	it("accepts a link to a domain written in its own script, as the backend does", () => {
+		expect(
+			links([{ platform: "FACEBOOK", url: "https://café.com/acme" }]).success,
+		).toBe(true);
 	});
 
 	it("rejects a platform outside the backend's closed list", () => {

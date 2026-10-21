@@ -1,5 +1,6 @@
 import { z } from "zod";
 import * as m from "#/paraglide/messages";
+import { isWebUrl } from "#/shared/web-url";
 import { MENU_LINK_TYPES } from "../format";
 
 export interface MenuItemFormNode {
@@ -35,12 +36,20 @@ const menuItemNodeSchema: z.ZodType<MenuItemFormNode, MenuItemFormNode> =
 						message: m.menu_items_target_required(),
 					});
 				}
-				if (node.linkType === "EXTERNAL_URL" && !node.url.trim()) {
-					ctx.addIssue({
-						code: "custom",
-						path: ["url"],
-						message: m.menu_items_url_required(),
-					});
+				if (node.linkType === "EXTERNAL_URL") {
+					if (!node.url.trim()) {
+						ctx.addIssue({
+							code: "custom",
+							path: ["url"],
+							message: m.menu_items_url_required(),
+						});
+					} else if (!isWebUrl(node.url)) {
+						ctx.addIssue({
+							code: "custom",
+							path: ["url"],
+							message: m.validation_web_url(),
+						});
+					}
 				}
 			}),
 	) as z.ZodType<MenuItemFormNode, MenuItemFormNode>;
