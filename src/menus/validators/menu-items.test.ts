@@ -72,6 +72,8 @@ describe("menuItemsSchema", () => {
 		"https://www.instagram.com/scapepark",
 		"http://localhost:8080/policies/cancellation",
 		"  https://example.com  ",
+		"https://café.com",
+		"https://example.com/a b",
 	])("accepts the web address %j", (url) => {
 		expect(urlIssue(url)).toBeUndefined();
 	});
@@ -83,7 +85,6 @@ describe("menuItemsSchema", () => {
 		"mailto:hello@example.com",
 		"https://",
 		"https://exa mple.com",
-		"https://example.com/a b",
 		"http:///path",
 		"https:/example.com",
 		"http://:80",

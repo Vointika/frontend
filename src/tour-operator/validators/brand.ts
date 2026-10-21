@@ -1,5 +1,6 @@
 import { z } from "zod";
 import * as m from "#/paraglide/messages";
+import { isWebUrl } from "#/shared/web-url";
 import { SOCIAL_PLATFORMS } from "../social-platforms";
 
 export const brandTextSchema = z.object({
@@ -34,7 +35,7 @@ const socialUrl = z
 	.string()
 	.trim()
 	.max(500, m.validation_max_length({ count: 500 }))
-	.refine((v) => /^https?:\/\/\S/.test(v), m.validation_social_url());
+	.refine(isWebUrl, m.validation_web_url());
 
 export const brandSocialLinksSchema = z.object({
 	socialLinks: z

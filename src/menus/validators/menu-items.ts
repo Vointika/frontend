@@ -1,5 +1,6 @@
 import { z } from "zod";
 import * as m from "#/paraglide/messages";
+import { isWebUrl } from "#/shared/web-url";
 import { MENU_LINK_TYPES } from "../format";
 
 export interface MenuItemFormNode {
@@ -10,23 +11,6 @@ export interface MenuItemFormNode {
 	translations: Record<string, string>;
 	children: MenuItemFormNode[];
 }
-
-// The backend's rule (WebUrl): a URI with an http or https scheme and a host.
-// The browser's URL repairs what Java's URI refuses (`http:///x` and
-// `https:/x` gain a host, a space is encoded), so the shape is checked as
-// written: the scheme, `//`, then a host character, and no whitespace.
-const WEB_URL = /^https?:\/\/[^/?#\s]/i;
-
-const isWebUrl = (raw: string): boolean => {
-	const value = raw.trim();
-	if (!WEB_URL.test(value) || /\s/.test(value)) return false;
-	try {
-		new URL(value);
-		return true;
-	} catch {
-		return false;
-	}
-};
 
 const menuItemNodeSchema: z.ZodType<MenuItemFormNode, MenuItemFormNode> =
 	z.lazy(() =>
@@ -63,7 +47,7 @@ const menuItemNodeSchema: z.ZodType<MenuItemFormNode, MenuItemFormNode> =
 						ctx.addIssue({
 							code: "custom",
 							path: ["url"],
-							message: m.menu_items_url_invalid(),
+							message: m.validation_web_url(),
 						});
 					}
 				}
