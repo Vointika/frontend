@@ -168,16 +168,18 @@ const DefinitionView = ({
 			<AppCard
 				title={m.metaobject_fields()}
 				action={
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => {
-							addField.reset();
-							setAddOpen(true);
-						}}
-					>
-						{m.metaobject_add_field()}
-					</Button>
+					canWrite && (
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								addField.reset();
+								setAddOpen(true);
+							}}
+						>
+							{m.metaobject_add_field()}
+						</Button>
+					)
 				}
 			>
 				<ul className="flex flex-col divide-y">
@@ -192,28 +194,30 @@ const DefinitionView = ({
 									{field.key} · {metafieldTypeLabel(field.type)}
 								</p>
 							</div>
-							<div className="flex shrink-0 gap-1">
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={() => {
-										renameField.reset();
-										setRenaming(field);
-										setRenameOpen(true);
-									}}
-								>
-									{m.rename()}
-								</Button>
-								<Button
-									variant="ghost"
-									size="sm"
-									className="text-destructive"
-									disabled={definition.fields.length === 1}
-									onClick={() => setRemoving(field)}
-								>
-									{m.remove()}
-								</Button>
-							</div>
+							{canWrite && (
+								<div className="flex shrink-0 gap-1">
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={() => {
+											renameField.reset();
+											setRenaming(field);
+											setRenameOpen(true);
+										}}
+									>
+										{m.rename()}
+									</Button>
+									<Button
+										variant="ghost"
+										size="sm"
+										className="text-destructive"
+										disabled={definition.fields.length === 1}
+										onClick={() => setRemoving(field)}
+									>
+										{m.remove()}
+									</Button>
+								</div>
+							)}
 						</li>
 					))}
 				</ul>
@@ -222,12 +226,14 @@ const DefinitionView = ({
 			<AppCard
 				title={m.metaobject_entries()}
 				action={
-					<AppNewLink
-						to="/tour-operators/$tourOperatorId/content/metaobjects/$definitionId/entries/new"
-						params={{ tourOperatorId, definitionId: definition.id }}
-					>
-						{m.new_metaobject()}
-					</AppNewLink>
+					canWrite && (
+						<AppNewLink
+							to="/tour-operators/$tourOperatorId/content/metaobjects/$definitionId/entries/new"
+							params={{ tourOperatorId, definitionId: definition.id }}
+						>
+							{m.new_metaobject()}
+						</AppNewLink>
+					)
 				}
 			>
 				<AppDataTable

@@ -63,7 +63,15 @@ const owner: AuthUser = {
 	],
 };
 
-const render = () => {
+const staff: AuthUser = {
+	...owner,
+	tourOperators: owner.tourOperators.map((operator) => ({
+		...operator,
+		role: "STAFF",
+	})),
+};
+
+const render = (user: AuthUser = owner) => {
 	server.use(
 		http.get(BASE, () => HttpResponse.json(definition)),
 		http.get(`${API}/tour-operators/${OP}/metaobjects`, () =>
@@ -78,7 +86,7 @@ const render = () => {
 	);
 	return renderWithProviders(
 		<AppMetaobjectDefinitionDetail tourOperatorId={OP} definitionId={ID} />,
-		{ user: owner },
+		{ user },
 	);
 };
 
@@ -106,5 +114,32 @@ describe("AppMetaobjectDefinitionDetail", () => {
 		await user.click(screen.getByRole("button", { name: /^rename$/i }));
 		const reopened = await screen.findByRole("dialog");
 		expect(within(reopened).queryByText(REASON)).not.toBeInTheDocument();
+	});
+
+	it("shows an editor every write on the type, fields and entries", async () => {
+		render(owner);
+
+		expect(
+			await screen.findByRole("button", { name: /add field/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /^rename$/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /^remove$/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: /new entry/i }),
+		).toBeInTheDocument();
+	});
+
+	it("shows a viewer the type and its fields with no write they would be refused", async () => {
+		render(staff);
+
+		expect(await screen.findByText("Size")).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: /add field/i })).toBeNull();
+		expect(screen.queryByRole("button", { name: /^rename$/i })).toBeNull();
+		expect(screen.queryByRole("button", { name: /^remove$/i })).toBeNull();
+		expect(screen.queryByRole("link", { name: /new entry/i })).toBeNull();
 	});
 });
